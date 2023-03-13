@@ -426,6 +426,7 @@ void swapNodes(BST_Node *root, int maxBar, int minBar){
     root->bar = (maxBar + minBar) - root->bar; 
 }
 
+// Helper Function: Reverses the BST using post-order traversal. [Used in reverseSong()]
 void reverseBST(BST_Node *root, int maxBar, int minBar){
 
     if(root == NULL) return;
@@ -490,6 +491,82 @@ BST_Node *reverseSong(BST_Node *root)
  *      Add any helper functions you need for implementing BST_harmonize() just below this
  * comment block, and above BST_Harmonize itself!
  * ******************************************************************************************/
+
+// Linked List of BST_Nodes! //
+typedef struct BST_Node_Copy{
+    BST_Node *node;
+    struct BST_Node_Copy *next;
+
+}BST_Node_Copy;
+
+// Helper Function: Initialize a new BSTNC and takes in node's contents. //
+BST_Node_Copy *createBSTNC(BST_Node *node){
+    BST_Node_Copy *copy = NULL;
+	copy = (BST_Node_Copy *)calloc(1, sizeof(BST_Node_Copy));	
+
+    if (copy == NULL) return NULL;
+	
+	copy->node = node;
+	return copy;
+}
+
+// Helper Function: Searches for a BSTNC.
+BST_Node_Copy *searchBSTNC(BST_Node_Copy *head, BST_Node_Copy *node){
+    BST_Node_Copy *p = head;
+
+    while (p != NULL)
+    {
+        if (p->node->index == node->node->index && p->node->bar == node->node->bar && p->node->freq == node->node->freq)
+        { 
+            return p;
+        }
+        p = p->next;
+    }
+
+    return p; 
+}
+
+// Helper Function: Inserts a BSTNC into the LL.
+BST_Node_Copy *insertBSTNC(BST_Node_Copy *head, BST_Node *node)
+{
+    BST_Node_Copy *p = createBSTNC(node);
+
+    if (head == NULL) return p;
+    if (searchBSTNC(head, p)!= NULL) return head;
+
+    p->next = head; 
+    return p; 
+}
+
+// Helper Function: Adds harmony using pre-order traversal! [Used in harmonize()]
+void add_harmony(BST_Node *proper_root, BST_Node *root, int semitones, double time_shift, BST_Node_Copy *BSTNC_head){
+    if (root == NULL) return;
+
+    int k = 0;
+
+    while (root->freq != note_freq[k] && k <= 99) k++;
+
+    double new_index = root->index + time_shift;
+
+    // Checks OoB Cases - Input Sanitization //
+    if (k + semitones >= 0 && k + semitones <= 99 && new_index >= 0 && new_index < 1){  
+        BST_Node_Copy *BSTNC_root = createBSTNC(root);
+
+        if (searchBSTNC(BSTNC_head, BSTNC_root) == NULL){
+
+            // EXTREMELY small increment to avoid inserting a duplicate key! // 
+            if (BST_search(proper_root, root->bar, new_index) != NULL) new_index += 0.0000001;
+
+            BST_Node *new = newBST_Node(note_freq[k+semitones], root->bar, new_index);
+            root = BST_insert(root,new);
+            BSTNC_head = insertBSTNC(BSTNC_head,new);
+        }
+
+    }
+
+    add_harmony(proper_root, root->left, semitones, time_shift, BSTNC_head);
+    add_harmony(proper_root, root->right, semitones, time_shift, BSTNC_head);
+}
 
 BST_Node *BST_harmonize(BST_Node *root, int semitones, double time_shift)
 {
@@ -565,5 +642,6 @@ BST_Node *BST_harmonize(BST_Node *root, int semitones, double time_shift)
      * Implement this function
      ****/
     
-    return NULL;
+    add_harmony(root, root, semitones, time_shift, NULL);
+    return root;
 }
