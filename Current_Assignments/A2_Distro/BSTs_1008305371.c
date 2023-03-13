@@ -213,16 +213,16 @@ BST_Node *BST_delete(BST_Node *root, int bar, double index)
             return NULL;
         }
 
-        // Case 2: One child (Left Child) //
-        if (root->right == NULL){
-            BST_Node *temp = root->left;
+        // Case 2: One child (Right Child) //
+        if (root->left == NULL){
+            BST_Node *temp = root->right;
             free(root);
             return temp;
         }
 
-        // Case 2: One child (Right Child) //
-        if (root->left == NULL){
-            BST_Node *temp = root->right;
+        // Case 2: One child (Left Child) //
+        if (root->right == NULL){
+            BST_Node *temp = root->left;
             free(root);
             return temp;
         }
@@ -237,12 +237,12 @@ BST_Node *BST_delete(BST_Node *root, int bar, double index)
         root->key = temp->key;
 
         // Delete the successor node. //
-        root->right = BST_delete(root->right, bar, index);
+        root->right = BST_delete(root->right, root->bar, root->index);
     }
 
     // Still looking for the node to delete... //
-    if (key < root->key) BST_delete(root->left, bar, index);
-    else BST_delete(root->right, bar, index);
+    if (key < root->key) root->left = BST_delete(root->left, bar, index);
+    else root->right = BST_delete(root->right, bar, index);
 
     return root;
 }
@@ -438,6 +438,8 @@ BST_Node *reverseSong(BST_Node *root)
     /*** TO DO:
      * Implement this function! (Crunchy!)
      ****/
+
+    return NULL; // Remove this later!
 }
 
 /********************************************************************************************
@@ -520,5 +522,4 @@ BST_Node *BST_harmonize(BST_Node *root, int semitones, double time_shift)
      ****/
     
     return NULL;
-
 }
