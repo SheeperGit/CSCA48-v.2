@@ -105,6 +105,34 @@ void caesar_breaker(unsigned char crypto_message[MAX_STR_LEN], unsigned char pas
  //              That's it, you should think about how to use this information to solve your task.
  //              there are many ways to approach this problem, some better than others. Think carefully!
 
+    unsigned char crypto_msg_copy[MAX_STR_LEN];
+    int crypto_msg_size = strlen((char *)crypto_message);
+    int booler;
+
+    for (int i = 0; i < 10; i++){
+        memcpy(crypto_msg_copy, crypto_message, crypto_msg_size);
+        caesar_decipher(crypto_msg_copy, dictionary[i]);
+
+        // EoM reached! //
+        if(crypto_msg_copy[crypto_msg_size - 1] == '\n') booler = 0;
+
+        // Still more to go! //
+        else booler = -1;
+
+        for (int j = 0; j < crypto_msg_size - 1 && booler == 0; j++)
+        {
+            if (((int)crypto_msg_copy[j] < 32 || (int)crypto_msg_copy[j] > 126) && (crypto_msg_copy[j] != '\n' || crypto_msg_copy[j] != '\t')){
+                booler = -1;
+            }
+        }
+
+        if (booler != -1)
+        {
+            // Got the password! //
+            memcpy(password, dictionary[i], MAX_STR_LEN);
+            return;
+        }
+    }
 }
 
 #ifndef __testing
