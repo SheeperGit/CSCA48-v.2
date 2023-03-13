@@ -138,6 +138,8 @@ BST_Node *BST_insert(BST_Node *root, BST_Node *new_node)
 
     if (new_node->key > root->key) root->right = BST_insert(root->right, new_node);
     else root->left = BST_insert(root->left, new_node);
+
+    return root;
 }
 
 BST_Node *BST_search(BST_Node *root, int bar, double index)
