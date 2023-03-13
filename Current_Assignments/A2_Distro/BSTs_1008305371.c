@@ -163,8 +163,8 @@ BST_Node *BST_search(BST_Node *root, int bar, double index)
     if (root == NULL) return NULL;
     if (root->key == key) return root; // Node Found!
 
-    if (key > root->key) BST_search(root->right, bar, index);
-    else BST_search(root->left, bar, index);
+    if (key > root->key) return BST_search(root->right, bar, index);
+    else return BST_search(root->left, bar, index);
 }
 
 BST_Node *find_successor(BST_Node *right_child_node)
@@ -395,6 +395,47 @@ void delete_BST(BST_Node *root)
     free(root);
 }
 
+
+// Helper Function: Goes to rightmost subtree to get the highest bar value. [Used in reverseSong()]
+int getMaxBar(BST_Node *root){
+    // To get the minimum bar, go all the way right! //
+    while(root->right != NULL) root = root->right;
+
+    return(root->bar);
+}
+
+// Helper Function: Goes to leftmost subtree to get the lowest bar value. [Used in reverseSong()]
+int getMinBar(BST_Node *root){
+    // To get the minimum bar, go all the way left! //
+    while(root->left != NULL) root = root->left;
+
+    return(root->bar);
+}
+
+// Helper Function: Swaps pointers to left and right children.
+// Calculates index and bar values. [Used in reverseSong()]
+void swapNodes(BST_Node *root, int maxBar, int minBar){
+
+    // Swap children. //
+    BST_Node *temp = root->left;
+    root->left = root->right;
+    root->right = temp;
+
+    // Change index and bar values. //
+    root->index = 1.0 - root->index;
+    root->bar = (maxBar + minBar) - root->bar; 
+}
+
+void reverseBST(BST_Node *root, int maxBar, int minBar){
+
+    if(root == NULL) return;
+    
+    // Using post-order traversal for reversal //
+    reverseBST(root->left, maxBar, minBar);
+    reverseBST(root->right, maxBar, minBar);
+    swapNodes(root, maxBar, minBar);
+}
+
 BST_Node *reverseSong(BST_Node *root)
 {
     /*
@@ -439,7 +480,10 @@ BST_Node *reverseSong(BST_Node *root)
      * Implement this function! (Crunchy!)
      ****/
 
-    return NULL; // Remove this later!
+    if(root == NULL) return NULL;
+
+    reverseBST(root, getMaxBar(root), getMinBar(root));
+    return root;
 }
 
 /********************************************************************************************

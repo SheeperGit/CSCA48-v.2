@@ -17,7 +17,7 @@
  */
 
 #include<string.h>
-#include"BSTs.c"
+#include"BSTs_1008305371.c"
 
 void get_barindex(int *bar, double *index)
 {
@@ -33,7 +33,7 @@ int main()
 {
     int choice, bar, semitones,i;
     double freq, index, time_shift;
-    char note1[5], note2[5];
+    char note1[5]; // There was a note2[5] here.
     BST_Node *root=NULL;
     BST_Node *new_note=NULL;
     BST_Node *t=NULL;
