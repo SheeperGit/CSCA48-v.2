@@ -171,8 +171,7 @@ void load_ingredients(void)
  * The part of the assignment you need to implement starts below
  ***************************************************************/
 
-void print_ingredients(intNode *h)
-{
+void print_ingredients(intNode *h){
     /*
      * This function prints out all the ingredients corresponding
      * to the ingredient indexes stored in the linked list
@@ -203,8 +202,7 @@ int ingredient_index_recursive(char source_ingredient[MAX_STR_LEN], int i){
   return ingredient_index_recursive(source_ingredient, ++i);
 }
 
-int ingredient_index(char source_ingredient[MAX_STR_LEN])
-{
+int ingredient_index(char source_ingredient[MAX_STR_LEN]){
     /*
      * This function looks into the array with ingredient
      * names for one that matches the requested 
@@ -317,11 +315,23 @@ intNode *related_k_dist(intNode *h, char source_ingredient[MAX_STR_LEN], int k, 
      * Complete this function
      *******/
 
-    return NULL;
+  int src_index = ingredient_index(source_ingredient);
+  if (src_index == -1) return h;
+
+  for (int i = 0; i < MAT_SIZE; i++){
+    if (AdjMat[src_index][i] > 0){
+      if (searchInt(h, i) == 0) h = insertInt(h, i);
+      if (dist < k){
+        dist++;
+        h = related_k_dist(h, ingredients[i], k, dist);
+        dist--;
+      }
+    }
+  }
+  return h;
 }
 
-intNode *related_with_restrictions(char source_ingredient[MAX_STR_LEN], char avoid[MAX_STR_LEN], int k_source, int k_avoid)
-{
+intNode *related_with_restrictions(char source_ingredient[MAX_STR_LEN], char avoid[MAX_STR_LEN], int k_source, int k_avoid){
     /*
      * This function returns a linked list that contains the indexes of
      * all ingredients related to source_ingredient[] with a distance
@@ -353,12 +363,26 @@ intNode *related_with_restrictions(char source_ingredient[MAX_STR_LEN], char avo
      * TO DO:
      * Implement this function
      *****/
+  intNode *srclist = NULL;
+  srclist = related_k_dist(srclist, source_ingredient, k_source, 0);
 
-    return NULL;    
+  intNode *avoidlist = NULL;
+  if (k_avoid >= 0) avoidlist = insertInt(avoidlist, (ingredient_index(avoid)));
+
+  // Get first neighbours only. //
+  avoidlist = related_k_dist(avoidlist, avoid, k_avoid, 0);
+
+  intNode *restricted_srclist = NULL;
+
+  while (srclist != NULL){
+    if (searchInt(avoidlist, srclist->x) == 0) restricted_srclist = insertInt(restricted_srclist, srclist -> x);
+    srclist = srclist->next;
+  }
+  avoidlist = deleteList(avoidlist);
+  return restricted_srclist;    
 }
 
-void substitute_ingredient(char recipe[10][MAX_STR_LEN], char to_change[MAX_STR_LEN])
-{
+void substitute_ingredient(char recipe[10][MAX_STR_LEN], char to_change[MAX_STR_LEN]){
   /*
    * *CRUNCHY!*
    * 
@@ -388,5 +412,49 @@ void substitute_ingredient(char recipe[10][MAX_STR_LEN], char to_change[MAX_STR_
     * TO DO:
     * Complete this function!
     ******/
+  intNode *recipeList = NULL;
+  int to_adjust_index = -1;
+
+  for (int i = 0; i < 10; i++){
+    int index = ingredient_index(recipe[i]);
+    if (strcmp(recipe[i], to_change) == 0) to_adjust_index = i;
+
+    // If the ingredient was found, and the ingredient is non-empty, //
+    if ((index != -1) && (strcmp(recipe[i], "") != 0) && (strcmp(recipe[i], to_change) != 0)){
+      recipeList = insertInt(recipeList, index);
+    }
+  }
+
+  // Just in case there's nothing to change! //
+  if (to_adjust_index == -1) return;
+
+  intNode *tmp = recipeList;
+  intNode *sub_candidates = NULL;
+  double max_val = 0.00;
+  int max_index = -1;
+
+  while (tmp != NULL){
+    sub_candidates = related_k_dist(sub_candidates, ingredients[tmp->x] , 0, 0);
+    tmp = tmp->next;
+  }
+
+  while(sub_candidates != NULL){
+    intNode *tmp = recipeList;
+    while(tmp != NULL){
+      if ((AdjMat[sub_candidates->x][tmp->x] >= max_val) && (sub_candidates->x != max_index) && (searchInt(recipeList, sub_candidates->x) == 0)){
+        max_val = AdjMat[sub_candidates->x][tmp->x];
+        max_index = sub_candidates->x;
+      }
+      else if ((sub_candidates->x == max_index) && (searchInt(recipeList, sub_candidates->x) == 0)){
+        max_val += AdjMat[sub_candidates->x][tmp->x];
+      }
+      tmp = tmp->next;
+    }
+    sub_candidates = sub_candidates->next;
+  }
+
+  if (max_index != -1) strcpy(recipe[to_adjust_index], ingredients[max_index]);
+  return;
+
 }
 
