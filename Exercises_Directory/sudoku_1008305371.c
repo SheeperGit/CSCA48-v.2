@@ -98,7 +98,7 @@ void print_sudoku(int sudoku[9][9]){
   }
 }
 
-int square_checker(int sudoku[9][9], int row, int col, int value){
+int check_square(int sudoku[9][9], int row, int col, int value){
   // Initializing squares of the Sudoku. //
   int start_row = row - row % 3;
   int start_col = col - col % 3;
@@ -111,25 +111,25 @@ int square_checker(int sudoku[9][9], int row, int col, int value){
   return 1;
 }
 
-int row_checker(int sudoku[9][9], int row, int col, int value){
+int check_row(int sudoku[9][9], int row, int col, int value){
   for (int i = 0; i < 9; i++){
     if (i != col && sudoku[row][i] == value) return 0; // Failed...
   }
   return 1;
 }
 
-int col_checker(int sudoku[9][9], int row, int col, int value){
+int check_row(int sudoku[9][9], int row, int col, int value){
   for (int i = 0; i < 9; i++){
     if (i != row && sudoku[i][col] == value) return 0;
   }
   return 1;
 }
 
-int valid_checker(int sudoku[9][9], int row, int col, int value){
-  return (col_checker(sudoku, row, col, value) && row_checker(sudoku, row, col, value) && square_checker(sudoku, row, col, value));
+int check_valid(int sudoku[9][9], int row, int col, int value){
+  return (check_row(sudoku, row, col, value) && check_row(sudoku, row, col, value) && check_square(sudoku, row, col, value));
 }
 
-int board_checker(int sudoku[9][9]){
+int check_board(int sudoku[9][9]){
   /*
    *  This function checks whether a Sudoku is properly
    * solved. That means that each row, column, and
@@ -142,9 +142,9 @@ int board_checker(int sudoku[9][9]){
   for (int row = 0; row < 9; row++){
     for (int col = 0; col < 9; col++){
       if (sudoku[row][col] != 0){
-        if (!col_checker(sudoku, row, col, sudoku[row][col]) ||
-            !row_checker(sudoku, row, col, sudoku[row][col]) ||
-            !square_checker(sudoku, row, col, sudoku[row][col])) return 0;
+        if (!check_row(sudoku, row, col, sudoku[row][col]) ||
+            !check_row(sudoku, row, col, sudoku[row][col]) ||
+            !check_square(sudoku, row, col, sudoku[row][col])) return 0;
       }
     }
   }
@@ -196,9 +196,9 @@ int solved(int sudoku[9][9]){
 
    for (int row = 0; row < 9; row++){
     for (int col = 0; col < 9; col++){
-      if (!col_checker(sudoku, row, col, sudoku[row][col]) || 
-          !row_checker(sudoku, row, col, sudoku[row][col]) || 
-          !square_checker(sudoku, row, col, sudoku[row][col]) || 
+      if (!check_row(sudoku, row, col, sudoku[row][col]) || 
+          !check_row(sudoku, row, col, sudoku[row][col]) || 
+          !check_square(sudoku, row, col, sudoku[row][col]) || 
           sudoku[row][col] == 0) return 0;
           // Checks for the existence of at least one zero.
     }
@@ -209,7 +209,7 @@ int solved(int sudoku[9][9]){
 int solver(int sudoku[9][9]){
   // Already Complete!
   if (solved(sudoku)) return 1;
-  if (!board_checker(sudoku)) return 0;
+  if (!check_board(sudoku)) return 0;
 
   int row;
   int col; 
@@ -224,7 +224,7 @@ int solver(int sudoku[9][9]){
   // Solving! //
   for(int n = 1; n <= 9; n++){
     // print_sudoku(sudoku); // Uncomment for debugging purposes only!
-    if (valid_checker(sudoku, row, col, n)){
+    if (check_valid(sudoku, row, col, n)){
       sudoku[row][col] = n;
       if (solver(sudoku)) return 1;
 
