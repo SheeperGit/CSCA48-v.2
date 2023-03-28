@@ -318,13 +318,11 @@ intNode *related_k_dist(intNode *h, char source_ingredient[MAX_STR_LEN], int k, 
   int src_index = ingredient_index(source_ingredient);
   if (src_index == -1) return h;
 
-  for (int i = 0; i < MAT_SIZE; i++){
-    if (AdjMat[src_index][i] > 0){
-      if (searchInt(h, i) == 0) h = insertInt(h, i);
-      if (dist < k){
-        dist++;
-        h = related_k_dist(h, ingredients[i], k, dist);
-        dist--;
+  if (dist != k){
+    for (int i = 0; i < MAT_SIZE; i++){
+      if (AdjMat[src_index][i] >= 1){
+        if (searchInt(h, i) == 0) h = insertInt(h, i);
+        h = related_k_dist(h, ingredients[i], k, dist + 1);
       }
     }
   }
@@ -364,20 +362,18 @@ intNode *related_with_restrictions(char source_ingredient[MAX_STR_LEN], char avo
      * Implement this function
      *****/
   intNode *srclist = NULL;
-  srclist = related_k_dist(srclist, source_ingredient, k_source, 0);
-
   intNode *avoidlist = NULL;
-  if (k_avoid >= 0) avoidlist = insertInt(avoidlist, (ingredient_index(avoid)));
-
-  // Get first neighbours only. //
-  avoidlist = related_k_dist(avoidlist, avoid, k_avoid, 0);
-
   intNode *restricted_srclist = NULL;
+
+  srclist = related_k_dist(srclist, source_ingredient, k_source, 0);
+  if (k_avoid >= 0) avoidlist = insertInt(avoidlist, (ingredient_index(avoid)));
+  avoidlist = related_k_dist(avoidlist, avoid, k_avoid, 0); // Get first neighbours only. //
 
   while (srclist != NULL){
     if (searchInt(avoidlist, srclist->x) == 0) restricted_srclist = insertInt(restricted_srclist, srclist -> x);
     srclist = srclist->next;
   }
+  
   avoidlist = deleteList(avoidlist);
   return restricted_srclist;    
 }
@@ -412,49 +408,28 @@ void substitute_ingredient(char recipe[10][MAX_STR_LEN], char to_change[MAX_STR_
     * TO DO:
     * Complete this function!
     ******/
-  intNode *recipeList = NULL;
-  int to_adjust_index = -1;
+  int recipe_index;
+  int compatible_ingredients[MAT_SIZE];
+  int most_common_occurence = 0;
+  int sub_index = -1;
 
   for (int i = 0; i < 10; i++){
-    int index = ingredient_index(recipe[i]);
-    if (strcmp(recipe[i], to_change) == 0) to_adjust_index = i;
-
-    // If the ingredient was found, and the ingredient is non-empty, //
-    if ((index != -1) && (strcmp(recipe[i], "") != 0) && (strcmp(recipe[i], to_change) != 0)){
-      recipeList = insertInt(recipeList, index);
+    if (recipe[i] != ""){
+     recipe_index = ingredient_index(recipe[i]);
+     for (int j = 0; j < MAT_SIZE; j++) compatible_ingredients[j] += AdjMat[recipe_index][j];
     }
   }
 
-  // Just in case there's nothing to change! //
-  if (to_adjust_index == -1) return;
-
-  intNode *tmp = recipeList;
-  intNode *sub_candidates = NULL;
-  double max_val = 0.00;
-  int max_index = -1;
-
-  while (tmp != NULL){
-    sub_candidates = related_k_dist(sub_candidates, ingredients[tmp->x] , 0, 0);
-    tmp = tmp->next;
-  }
-
-  while(sub_candidates != NULL){
-    intNode *tmp = recipeList;
-    while(tmp != NULL){
-      if ((AdjMat[sub_candidates->x][tmp->x] >= max_val) && (sub_candidates->x != max_index) && (searchInt(recipeList, sub_candidates->x) == 0)){
-        max_val = AdjMat[sub_candidates->x][tmp->x];
-        max_index = sub_candidates->x;
-      }
-      else if ((sub_candidates->x == max_index) && (searchInt(recipeList, sub_candidates->x) == 0)){
-        max_val += AdjMat[sub_candidates->x][tmp->x];
-      }
-      tmp = tmp->next;
+  for (int i = 0; i < MAT_SIZE; i++){
+    if (i == ingredient_index(to_change)) compatible_ingredients[i] = 0;
+    if (compatible_ingredients[i] > most_common_occurence){
+      most_common_occurence = compatible_ingredients[i];
+      sub_index = i;
     }
-    sub_candidates = sub_candidates->next;
   }
 
-  if (max_index != -1) strcpy(recipe[to_adjust_index], ingredients[max_index]);
-  return;
-
+  for (int i = 0; i < 10; i++){
+    if (strcmp(recipe[i], to_change) == 0 && recipe[i] != "") strcpy(recipe[i], ingredients[sub_index]);
+  }
 }
 
