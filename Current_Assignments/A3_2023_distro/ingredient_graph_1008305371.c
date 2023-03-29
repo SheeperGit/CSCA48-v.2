@@ -410,6 +410,7 @@ void substitute_ingredient(char recipe[10][MAX_STR_LEN], char to_change[MAX_STR_
     ******/
   int recipe_index;
   int compatible_ingredients[MAT_SIZE];
+  for (int i = 0; i < MAT_SIZE; i++) compatible_ingredients[i] = 0;
   int most_common_occurence = 0;
   int sub_index = -1;
 
