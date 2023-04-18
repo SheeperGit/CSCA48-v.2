@@ -36,6 +36,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include"NoteSynth.c"
+#define MIN_HEIGHT_PLACEHOLDER 999999
+#define MAX_HEIGHT_PLACEHOLDER 0
 
 typedef struct BST_Node_Struct
 {
@@ -644,4 +646,56 @@ BST_Node *BST_harmonize(BST_Node *root, int semitones, double time_shift)
     
     add_harmony(root, root, semitones, time_shift, NULL);
     return root;
+}
+
+int get_min_height(BST_Node *root, int current_height, int min_height){
+    // Helper Function: Gets the minimum height of a leaf node in the BST.
+    // *Used in checkForBalance()*
+
+    if (root == NULL) return NULL;
+    current_height++;
+
+    get_min_height(root->left, current_height, min_height);
+    get_min_height(root->right, current_height, min_height);
+    if (root->left == NULL && root->right == NULL && current_height < min_height){
+        printf("Current Height = %d < %d = Minimum Height\n", current_height, min_height);
+        min_height = current_height;
+    }
+    printf("Final Min = %d\n", min_height);
+    // min val is getting reset here...
+    return min_height;
+}
+
+int get_max_height(BST_Node *root, int current_height, int max_height){
+    // Helper Function: Gets the maximum height of a leaf node in the BST.
+    // *Used in checkForBalance()*
+
+    if (root == NULL) return NULL;
+    current_height++;
+
+    get_max_height(root->left, current_height, max_height);
+    get_max_height(root->right, current_height, max_height);
+    if (root->left == NULL && root->right == NULL && current_height > max_height){
+        printf("Current Height = %d > %d = Maximum Height\n", current_height, max_height);
+        max_height = current_height;
+    }
+
+    printf("Final Max = %d\n", max_height);
+    // max val is getting reset here...
+    return max_height;
+}
+
+int checkForBalance(BST_Node *root){
+    // Returns 1, if the BST is balanced, and returns 0 o/w.
+    // For this function, a BST is balanced if the height of its leaves change by at most one.
+    // Another way to think about this is the mininum and maximum height of any leaf in the tree
+    // must not differ by more than one.
+
+    // printf("Min Height = %d\n", get_min_height(root, 0, MIN_HEIGHT_PLACEHOLDER));
+    // printf("Max Height = %d\n", get_max_height(root, 0, MAX_HEIGHT_PLACEHOLDER));
+
+    if (get_max_height(root, 0, MAX_HEIGHT_PLACEHOLDER) - get_min_height(root, 0, MIN_HEIGHT_PLACEHOLDER) > 1){
+        return 0;        
+    }
+    return 1;
 }

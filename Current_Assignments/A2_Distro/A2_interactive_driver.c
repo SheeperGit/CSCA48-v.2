@@ -44,8 +44,7 @@ int main()
     read_note_table();		// Set up tables of note names and frequencies.
       
     choice=0;
-    while (choice!=10)
-    {
+    while (choice!=11){
       printf("Please select from among the following options:\n");
       printf("0 - Insert new note\n");
       printf("1 - Search for note\n");
@@ -57,116 +56,109 @@ int main()
       printf("7 - Make and run playlist\n");
       printf("8 - Reverse Song\n");
       printf("9 - Harmonize\n");
-      printf("10 - Delete BST and exit\n");
+	  printf("10 - Check if BST is balanced\n");
+      printf("11 - Delete BST and exit\n");
       
       scanf("%d",&choice);
       getchar();
 
-      if (choice==0)
-      {
-	get_barindex(&bar, &index);
-	printf("Enter the note's frequency\n");
-	scanf("%lf",&freq);
-	getchar();
-	new_note=newBST_Node(freq,bar,index);
-	root=BST_insert(root,new_note);
+      if (choice==0){
+		get_barindex(&bar, &index);
+		printf("Enter the note's frequency\n");
+		scanf("%lf",&freq);
+		getchar();
+		new_note=newBST_Node(freq,bar,index);
+		root=BST_insert(root,new_note);
       }
       
-      if (choice==1)
-      {
-	get_barindex(&bar, &index);
-	t=BST_search(root,bar,index);
-	if (t!=NULL)
-	{
-	  printf("Found note at (bar:index)=%d:%f, with frequency=%f Hz\n",bar,index,t->freq);
-	}
-	else
-	{
-	  printf("No such note found in the tree\n");
-	}	
-      }
-      
-      if (choice==2)
-      {
-	get_barindex(&bar, &index);
-	root=BST_delete(root,bar,index);
-      }
-      
-      if (choice==3)
-	BST_inOrder(root,0);
-      
-      if (choice==4)
-	BST_preOrder(root,0);
-      
-      if (choice==5)
-	BST_postOrder(root,0);
-      
-      if (choice==6)
-      {
-	printf("Name of the song file (in .txt format)\n");
-	fgets(&name[0],1024,stdin);
-	i=strlen(&name[0]);
-	if (name[i-1]=='\n') name[i-1]='\0';
-	f=fopen(&name[0],"r");
-	if (f==NULL)
-	{
-	  printf("Unable to open song file for reading. Please check name and path\n");
-	}
-	else
-	{
-	  while(fgets(&line[0],50,f))
-	  {
-	    sscanf(line,"%d %lf",&bar, &index);
-	    i=strlen(line);
-	    if (line[i-1]=='\n') line[i-1]='\0';
-	    if (line[i-4]=='\t') strcpy(&note1[0],&line[i-3]);
-	    else strcpy(&note1[0],&line[i-4]);
-	    freq=-1;
-	    for (i=0; i<100; i++)	      
-	      if (strcmp(&note_names[i][0],note1)==0) {freq=note_freq[i]; break;}
-	    printf("Read note from file with (bar:index)=%d:%f, name=%s, freq=%f\n",bar,index,note1,freq);
-
-	    if (freq>0)
-	    {
-              while(1)
-              {
-	       t=BST_search(root,bar,index);
-	       if (t!=NULL) index=index+(1e-6*(double)rand()/(double)RAND_MAX)-(.5e-6);
-               else break;
-	      }
-	      new_note=newBST_Node(freq,bar,index);
-	      root=BST_insert(root,new_note);
-	    }
+      if (choice==1){
+		get_barindex(&bar, &index);
+		t=BST_search(root,bar,index);
+		if (t!=NULL){
+			printf("Found note at (bar:index)=%d:%f, with frequency=%f Hz\n",bar,index,t->freq);
+		}
+		else{
+			printf("No such note found in the tree\n");
+		}	
 	  }
-	  fclose(f);
-	}
+      
+      if (choice==2){
+		get_barindex(&bar, &index);
+		root=BST_delete(root,bar,index);
       }
       
-      if (choice==7)
-      {
-	BST_makePlayList(root);
-	play_notes(2);
-      }
+      if (choice==3) BST_inOrder(root,0);
       
-      if (choice==8)
-      {
-	printf("Reversing song now...\n");
-	root=reverseSong(root);
-	printf("Done, check that the song is actually backwards!\n");
-      }
+      if (choice==4) BST_preOrder(root,0);
       
-      if (choice==9)
-      {
-	printf("Enter the number of semitones for note shifting\n");
-	scanf("%d",&semitones);
-	getchar();
-	printf("Enter the time shift for each new note\n");
-	scanf("%lf",&time_shift);
-	root=BST_harmonize(root,semitones,time_shift);
-      }
+      if (choice==5) BST_postOrder(root,0);
       
-    }	// Enf while (choice!=10)
+      if (choice==6){
+		printf("Name of the song file (in .txt format)\n");
+		fgets(&name[0],1024,stdin);
+		i=strlen(&name[0]);
+		if (name[i-1]=='\n') name[i-1]='\0';
+		f=fopen(&name[0],"r");
+		if (f==NULL)
+		{
+		printf("Unable to open song file for reading. Please check name and path\n");
+		}
+		else
+		{
+		while(fgets(&line[0],50,f))
+		{
+			sscanf(line,"%d %lf",&bar, &index);
+			i=strlen(line);
+			if (line[i-1]=='\n') line[i-1]='\0';
+			if (line[i-4]=='\t') strcpy(&note1[0],&line[i-3]);
+			else strcpy(&note1[0],&line[i-4]);
+			freq=-1;
+			for (i=0; i<100; i++)	      
+			if (strcmp(&note_names[i][0],note1)==0) {freq=note_freq[i]; break;}
+			printf("Read note from file with (bar:index)=%d:%f, name=%s, freq=%f\n",bar,index,note1,freq);
 
+			if (freq>0)
+			{
+				while(1)
+				{
+			t=BST_search(root,bar,index);
+			if (t!=NULL) index=index+(1e-6*(double)rand()/(double)RAND_MAX)-(.5e-6);
+				else break;
+			}
+			new_note=newBST_Node(freq,bar,index);
+			root=BST_insert(root,new_note);
+			}
+		}
+		fclose(f);
+		}
+		}
+      
+      if (choice==7){
+		BST_makePlayList(root);
+		play_notes(2);
+      }
+      
+      if (choice==8){
+		printf("Reversing song now...\n");
+		root=reverseSong(root);
+		printf("Done, check that the song is actually backwards!\n");
+      }
+      
+      if (choice==9){
+		printf("Enter the number of semitones for note shifting\n");
+		scanf("%d",&semitones);
+		getchar();
+		printf("Enter the time shift for each new note\n");
+		scanf("%lf",&time_shift);
+		root=BST_harmonize(root,semitones,time_shift);
+      }
+      
+	  if (choice == 10){
+		if (checkForBalance(root) == 1) printf("The BST is balanced!\n");
+		else printf("The BST is not balanced...\n");
+	  }
+    }	
+	
     delete_BST(root);
     return 0;
 }
