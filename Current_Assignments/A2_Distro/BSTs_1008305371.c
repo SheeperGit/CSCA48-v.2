@@ -36,8 +36,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include"NoteSynth.c"
-#define MIN_HEIGHT_PLACEHOLDER 999999
-#define MAX_HEIGHT_PLACEHOLDER 0
+#define bool int
 
 typedef struct BST_Node_Struct
 {
@@ -685,7 +684,14 @@ BST_Node *BST_harmonize(BST_Node *root, int semitones, double time_shift)
 //     return max_height;
 // }
 
-int checkForBalance(BST_Node *root, int min_height, int max_height, int current_height){
+int max(int a, int b) {return (a >= b) ? a : b;}
+
+int height(BST_Node *node){
+    if (node == NULL) return 0;
+    return 1 + max(height(node->left), height(node->right));
+}
+
+bool checkForBalance(BST_Node *root){
     // Returns 1, if the BST is balanced, and returns 0 o/w.
     // For this function, a BST is balanced if the height of its leaves change by at most one.
     // Another way to think about this is the mininum and maximum height of any leaf in the tree
@@ -693,27 +699,16 @@ int checkForBalance(BST_Node *root, int min_height, int max_height, int current_
 
     // Note: min_height, max_height must be set to vals similar to 9999999, 0, respectively.
 
-    // printf("Min Height = %d\n", get_min_height(root, 0, MIN_HEIGHT_PLACEHOLDER));
-    // printf("Max Height = %d\n", get_max_height(root, 0, MAX_HEIGHT_PLACEHOLDER));
-
-    if(root != NULL){
-        current_height++;
-
-        checkForBalance(root->left, min_height, max_height, current_height);
-        checkForBalance(root->right, min_height, max_height, current_height);
-        if (root->left == NULL && root->right == NULL){
-            if (current_height > max_height){
-                printf("Current Height = %d>%d = Maximum Height\n", current_height, max_height);
-                max_height = current_height;
-            }
-            if (current_height < min_height){
-                printf("Current Height = %d<%d = Minimum Height\n", current_height, min_height);
-                min_height = current_height;
-            } 
-        }
-    }
-
-    printf("Final Max, Min = %d, %d\n", max_height, min_height);
-    if (max_height - min_height > 1) return 0;
-    return 1;
+    int lh;
+    int rh;
+ 
+    if (root == NULL) return 1;
+ 
+    // Get the height of the left and right subtrees //
+    lh = height(root->left);
+    rh = height(root->right);
+ 
+    if (abs(lh - rh) <= 1 && checkForBalance(root->left) && checkForBalance(root->right))
+        return 1;
+    return 0;
 }

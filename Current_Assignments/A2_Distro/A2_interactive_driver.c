@@ -154,7 +154,7 @@ int main()
       }
       
 	  if (choice == 10){
-		if (root == NULL || checkForBalance(root, 9999999, 0, 0) == 1) printf("The BST is balanced!\n");
+		if (checkForBalance(root) == 1) printf("The BST is balanced!\n");
 		else printf("The BST is not balanced...\n");
 	  }
     }	
